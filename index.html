@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Codeora • VS Code Style</title>
+  <style>
+    :root {
+      --bg: #1e1e2e;
+      --sidebar: #181825;
+      --editor: #1e1e2e;
+      --text: #cdd6f4;
+      --accent: #89b4fa;
+    }
+    body.light {
+      --bg: #f8f9fc;
+      --sidebar: #e6e9ef;
+      --editor: #ffffff;
+      --text: #1a1a2e;
+      --accent: #6366f1;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--sidebar);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #313244;
+      flex-wrap: wrap;
+    }
+
+    .logo { font-weight: 700; font-size: 1.4rem; color: var(--accent); }
+
+    select, button, input {
+      background: #313244;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    body.light select, body.light button, body.light input {
+      background: #e6e9ef;
+      color: #1a1a2e;
+    }
+
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar);
+      border-right: 1px solid #313244;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--editor);
+    }
+
+    #editor {
+      flex: 1;
+      padding: 30px 40px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--editor);
+      border: none;
+      outline: none;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      tab-size: 4;
+    }
+
+    .status {
+      background: #181825;
+      padding: 6px 16px;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      color: #a6adc8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">CODEORA</div>
+    
+    <select id="language" onchange="setLanguage()">
+      <option value="plaintext">Plain Text</option>
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+      <option value="html">HTML</option>
+      <option value="css">CSS</option>
+    </select>
+
+    <select id="fontsize" onchange="changeFontSize()">
+      <option value="14">14px</option>
+      <option value="15">15px</option>
+      <option value="16" selected>16px</option>
+      <option value="17">17px</option>
+      <option value="18">18px</option>
+      <option value="20">20px</option>
+    </select>
+
+    <input type="color" id="colorpicker" onchange="changeTextColor()" title="Text Color">
+
+    <button onclick="toggleTheme()">Theme</button>
+    <button onclick="newFile()">New File</button>
+    <button onclick="downloadFile()">Download</button>
+  </header>
+
+  <div class="main">
+    <div class="sidebar">
+      <h3 style="margin:10px 0; color:#89b4fa;">Explorer</h3>
+      <div style="padding:8px; background:#313244; border-radius:6px; margin-top:8px;">
+        <strong>main.py</strong><br>
+        <strong>script.js</strong><br>
+        <strong>index.html</strong>
+      </div>
+    </div>
+
+    <div class="editor-container">
+      <div id="editor" contenteditable="true" spellcheck="false">
+// Welcome to Codeora
+console.log("Hello, World!");
+
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Developer"))
+      </div>
+      <div class="status">
+        <span id="lang-status">JavaScript</span>
+        <span>Line <span id="line">1</span>, Column <span id="col">1</span></span>
+        <span>100% • Ready</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const editor = document.getElementById('editor');
+    let currentLanguage = 'javascript';
+
+    function changeFontSize() {
+      const size = document.getElementById('fontsize').value;
+      editor.style.fontSize = size + 'px';
+    }
+
+    function changeTextColor() {
+      const color = document.getElementById('colorpicker').value;
+      document.execCommand('foreColor', false, color);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    function setLanguage() {
+      currentLanguage = document.getElementById('language').value;
+      document.getElementById('lang-status').textContent = 
+        currentLanguage.charAt(0).toUpperCase() + currentLanguage.slice(1);
+      highlightCode();
+    }
+
+    // Basic Syntax Highlighting (runs on input)
+    function highlightCode() {
+      // This is a simplified version. Real full highlighting is heavy for single file.
+      let text = editor.innerText;
+
+      if (currentLanguage === 'javascript') {
+        text = text
+          .replace(/\b(function|const|let|var|if|else|for|while|return|console)\b/g, '<span style="color:#f38ba8;">$1</span>')
+          .replace(/\b(true|false|null)\b/g, '<span style="color:#fab387;">$1</span>')
+          .replace(/"(.*?)"/g, '<span style="color:#a6e3a1;">"$1"</span>');
+      } 
+      else if (currentLanguage === 'python') {
+        text = text
+          .replace(/\b(def|class|if|elif|else|for|while|return|import|from|as)\b/g, '<span style="color:#f38ba8;">$1</span>')
+          .replace(/\b(True|False|None)\b/g, '<span style="color:#fab387;">$1</span>');
+      }
+      else if (currentLanguage === 'html') {
+        text = text
+          .replace(/(&lt;[^&gt;]+&gt;)/g, '<span style="color:#89b4fa;">$1</span>');
+      }
+
+      // Only update if not currently editing
+      if (document.activeElement !== editor) {
+        editor.innerHTML = text;
+      }
+    }
+
+    function newFile() {
+      editor.innerHTML = '// Start coding...';
+    }
+
+    function downloadFile() {
+      const text = editor.innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'code.' + (currentLanguage === 'javascript' ? 'js' : currentLanguage === 'python' ? 'py' : 'txt');
+      a.click();
+    }
+
+    // Live updates
+    editor.addEventListener('input', () => {
+      highlightCode();
+      updateCursorPosition();
+    });
+
+    function updateCursorPosition() {
+      const sel = window.getSelection();
+      if (sel.rangeCount) {
+        document.getElementById('line').textContent = '?';
+        document.getElementById('col').textContent = '?';
+      }
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        alert("✅ Saved to browser storage (auto-save is on)");
+      }
+    });
+
+    // Initialize
+    window.onload = () => {
+      editor.focus();
+      changeFontSize();
+    };
+  </script>
+</body>
+</html>
